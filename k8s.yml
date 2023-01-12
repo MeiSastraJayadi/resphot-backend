@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resphot-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resphot-apps
+  template:
+    metadata:
+      labels:
+        app: resphot-apps
+    spec:
+      containers:
+      - image: okteto build -t registry.cloud.okteto.net/meisastrajayadi/resphot-apps-meisastrajayadi:python
+        name: resphot-apps
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: resphot-apps
+spec:
+  type: ClusterIP
+  ports:
+  - name: "resphot-apps"
+    port: 8080
+  selector:
+    app: resphot-apps
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: resphot-apps
+  annotations:
+    dev.okteto.com/generate-host: resphot-apps
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: resphot-apps
+            port:
+              number: 8080
+        path: /
+        pathType: ImplementationSpecific
